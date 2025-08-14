@@ -1,0 +1,18 @@
+{% extends 'accounts/base.html' %}
+{% block content %}
+<div class="container">
+    <h2>Kayıt Ol</h2>
+    <form method="post">
+        {% csrf_token %}
+        <input type="text" name="username" placeholder="Kullanıcı Adı" required>
+        <input type="password" name="password" placeholder="Şifre" required>
+        <button type="submit">Kayıt Ol</button>
+    </form>
+    <div class="toggle" onclick="window.location.href='{% url 'login' %}'">Giriş sayfasına dön</div>
+    {% if error %}
+    <div class="message">{{ error }}</div>
+    {% elif message %}
+    <div class="message" style="color: green;">{{ message }}</div>
+    {% endif %}
+</div>
+{% endblock %}

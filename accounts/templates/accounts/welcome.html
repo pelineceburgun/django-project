@@ -1,0 +1,56 @@
+{% extends 'accounts/base.html' %}
+{% block content %}
+<div class="container">
+    <h2>Hoş Geldiniz!</h2>
+    <p>Merhaba, {{ username }}!</p>
+    <form method="post" action="{% url 'submit_message' %}">
+        {% csrf_token %}
+        <input type="text" name="message" placeholder="Mesajınızı yazın" required>
+        <button type="submit">Gönder</button>
+    </form>
+    {% if error %}
+    <div class="message">{{ error }}</div>
+    {% endif %}
+    <select id="actionSelect" onchange="handleAction()">
+        <option value="" disabled selected>Bir işlem seçin</option>
+        <option value="showMessage">Mesaj Göster</option>
+        <option value="changeColor">Renk Değiştir</option>
+        <option value="showInfo">Hesap Bilgisi</option>
+    </select>
+    <div class="action-result" id="actionResult"></div>
+    <h3>Gönderilen Mesajlar</h3>
+    {% if messages %}
+    <ul>
+        {% for message in messages %}
+        <li>{{ message.content }} ({{ message.created_at|date:"d.m.Y H:i" }})</li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>Henüz mesaj gönderilmedi.</p>
+    {% endif %}
+    <button onclick="window.location.href='{% url 'logout' %}'">Çıkış Yap</button>
+</div>
+<script>
+    function handleAction() {
+        const action = document.getElementById('actionSelect').value;
+        const actionResult = document.getElementById('actionResult');
+        fetch('{% url 'action' %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: 'action=' + action
+        })
+        .then(response => response.json())
+        .then(data => {
+            actionResult.textContent = data.result;
+            if (action === 'changeColor') {
+                const colors = ['#e6f3ff', '#ffe6e6', '#e6ffe6'];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                document.body.style.backgroundColor = randomColor;
+            }
+        });
+    }
+</script>
+{% endblock %}
